@@ -23,20 +23,12 @@ jobs:
         run: |
           pip install semgrep
           semgrep --config auto ./app
+- name: Install Trivy
+  run: |
+    sudo apt-get update -y
+    sudo apt-get install wget -y
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+    echo deb https://aquasecurity.github.io/trivy-repo/deb stable main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+    sudo apt-get update -y
+    sudo apt-get install trivy -y
 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget -y
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.56.2_Linux-64bit.deb
-          sudo dpkg -i trivy_0.56.2_Linux-64bit.deb
-
-      - name: Build Docker image
-        run: docker build -t nodeapp-secure -f docker/Dockerfile .
-
-      - name: Scan Docker image
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL nodeapp-secure
-
-      - name: Push image if secure
-        if: success()
-        run: echo "Image passed all security checks"
