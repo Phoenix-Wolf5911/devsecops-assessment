@@ -29,6 +29,9 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install wget -y
           wget -qO- https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
+          sudo mv trivy /usr/local/bin/
+          export PATH=$PATH:/usr/local/bin
+          trivy -v
 
       - name: Build Docker image
         run: docker build -t nodeapp-secure -f docker/Dockerfile .
