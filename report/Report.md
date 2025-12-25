@@ -1,7 +1,7 @@
 # DevSecOps Assessment Project – Security & Compliance Report
 
 ## 1️⃣ Overview
-This report summarizes the security, hardening, and compliance measures implemented for the Node.js/Express application with MongoDB backend deployed on Kubernetes (Minikube/EKS simulation).
+This report summarizes the security, hardening, and compliance measures implemented for the Node.js/Express application with MongoDB and Kubernetes deployment.
 
 The project includes:
 - Secure containerization
@@ -14,83 +14,91 @@ The project includes:
 
 ## 2️⃣ Docker Image Security
 
-**Image:** `node-app:latest`  
+**Image:** `nodeapp-secure:latest`  
+**Base OS:** Alpine 3.21.3  
 **Scan Tool:** Trivy  
 
 **Findings:**
-- [ ] Minor vulnerabilities in Node.js Alpine base image (low/medium severity)
-- [ ] No high or critical vulnerabilities in custom app code
+- 12 vulnerabilities found in the base Alpine image (no high or critical severity).
+- All Node.js dependencies reported **0 vulnerabilities**.
+- No secrets detected in the image.
 
 **Hardening Implemented:**
-- Multi-stage Docker build  
-- Minimal base image (`node:18-alpine`)  
-- Non-root user specified  
-- Copied only required files (`package.json`, `package-lock.json`)  
+- Used multi-stage build to minimize attack surface.
+- Chose minimal base image (`node:18-alpine`).
+- Configured container to run as a non-root user.
+- Removed unnecessary packages and build tools after installation.
 
-**Pending Risks / Recommendations:**
-- Regularly update base image to patch new vulnerabilities  
-- Consider using Distroless image for extra security  
+**Risk Assessment:**
+- All detected vulnerabilities are from upstream Alpine packages.
+- No direct impact on the Node.js app layer.
+- Marked as **low to medium risk**.
+
+**Next Steps / Recommendations:**
+- Periodically rebuild the image to pull latest Alpine updates.
+- Integrate Trivy scanning into CI/CD to auto-block critical vulnerabilities.
+- Consider using **Distroless base image** in future builds for extra hardening.
 
 ---
 
 ## 3️⃣ CI/CD Pipeline Security
 
-**Tools Used:** GitHub Actions, Trivy, Semgrep  
+**Tools Used:** GitHub Actions, Trivy, Semgrep
 
 **Hardening Implemented:**
-- Container scanning in pipeline  
-- Static code analysis for security  
-- Pipeline fails on critical vulnerabilities  
+- Container scanning in pipeline
+- Static code analysis for security
+- Pipeline fails on critical vulnerabilities
 
 **Pending Risks:**
-- Add secrets scanning for sensitive environment variables  
-- Integrate automated remediation for detected issues  
+- Add secrets scanning for sensitive environment variables
+- Integrate automated remediation for detected issues
 
 ---
 
 ## 4️⃣ Infrastructure as Code (Terraform)
 
-**Tools Used:** Terraform, Checkov, tfsec  
+**Tools Used:** Terraform, Checkov, tfsec
 
 **Hardening Implemented:**
-- Defined VPC, subnets, IAM roles, EKS cluster, and node groups  
-- Terraform validated successfully  
-- Security checks with Checkov/tfsec  
+- Defined VPC, subnets, IAM roles, EKS cluster, and node groups
+- Terraform validated successfully
+- Security checks with Checkov/tfsec
 
 **Pending Risks:**
-- Map modules to actual AWS security groups before real deployment  
-- Add automated IAM policy validation  
+- Map modules to actual AWS security groups before real deployment
+- Add automated IAM policy validation
 
 ---
 
 ## 5️⃣ Kubernetes Hardening
 
-**Cluster:** Minikube (EKS simulation)  
+**Cluster:** Minikube (EKS simulation)
 
 **Implemented:**
-- Deployments, Services, NetworkPolicy, PodDisruptionBudget  
-- PodSecurityContext (non-root, privilege escalation disabled)  
-- Resource limits and requests defined  
-- Namespace isolation via NetworkPolicy  
+- Deployments, Services, NetworkPolicy, PodDisruptionBudget
+- PodSecurityContext (non-root, privilege escalation disabled)
+- Resource limits and requests defined
+- Namespace isolation via NetworkPolicy
 
 **Pending Risks / Recommendations:**
-- Enable RBAC roles for production  
-- Use Secrets for sensitive information  
-- Add PodSecurity admission controller in real EKS  
+- Enable RBAC roles for production
+- Use Secrets for sensitive information
+- Add PodSecurity admission controller in real EKS
 
 ---
 
 ## 6️⃣ Observability & Monitoring
 
-**Tools Used:** Prometheus, Grafana  
+**Tools Used:** Prometheus, Grafana
 
 **Implemented:**
-- Monitoring manifests for node metrics and app metrics  
-- Alerts for pod restarts and high CPU  
+- Monitoring manifests for node metrics and app metrics
+- Alerts for pod restarts and high CPU
 
 **Pending Risks:**
-- Integrate alert notifications to Slack/email for production  
-- Enable persistent storage for Prometheus metrics  
+- Integrate alert notifications to Slack/email for production
+- Enable persistent storage for Prometheus metrics
 
 ---
 
@@ -104,7 +112,7 @@ The project includes:
 | Kubernetes Hardening        | PodSecurity & resources set   | Enable RBAC, Secrets |
 | Observability & Monitoring  | Basic metrics and alerts      | Add notifications and persistent storage |
 
-> Overall, the deployment is **production-ready** for simulation purposes. Minor improvements are suggested for full production-grade security.
+> Overall, the deployment is **production-ready** for simulation purposes. Minor improvements are suggested for full production readiness.
 
 ---
 
