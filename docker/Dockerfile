@@ -1,18 +1,23 @@
-# Build stage
-FROM node:18-alpine AS build
-WORKDIR /app
+FROM node:18-alpine AS builder
+
+RUN apk update && apk upgrade --no-cache && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /usr/src/app
+
+# Now app/ exists
 COPY app/package*.json ./
-RUN npm install
-COPY app ./
-RUN npm run build || echo "No build step"
 
-# Run stage
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=build /app .
-# Add non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+RUN npm ci --only=production && \
+    npm audit --audit-level=high || true
+
+COPY app/server.js ./
+
+USER nodejs
 EXPOSE 3000
-CMD ["node", "index.js"]
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"
+
+CMD ["node", "server.js"]

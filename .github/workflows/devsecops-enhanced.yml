@@ -1,0 +1,56 @@
+name: DevSecOps Security Pipeline
+on: [push, pull_request]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run SAST with Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Secure Docker Image
+        run: |
+          docker build -t myapp:${{ github.sha }} \
+            -f docker/Dockerfile \
+            --build-arg BUILDKIT_PROGRESS=plain .
+
+      - name: Scan Container Image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'myapp:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Validate Kubernetes Manifests
+        run: |
+          kubectl apply --dry-run=client -f k8s/
+          echo "✅ K8s manifests are valid"
+
+      - name: Terraform Security Scan
+        run: |
+          docker run --rm \
+            -v "$(pwd)/terraform:/tf" \
+            bridgecrew/checkov \
+            -d /tf \
+            --framework terraform \
+            --quiet \
+            --compact
+
+      - name: Upload Security Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            trivy-results.sarif
+          retention-days: 7

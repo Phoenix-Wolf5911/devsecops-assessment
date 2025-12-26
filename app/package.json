@@ -1,18 +1,10 @@
 {
-  "name": "app",
+  "name": "nodeapp",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Simple Node.js application",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^5.2.1",
-    "glob": "^13.0.0",
-    "mongoose": "^9.0.2",
-    "prom-client": "^15.1.3"
-  },
-  "description": ""
+  "dependencies": {}
 }

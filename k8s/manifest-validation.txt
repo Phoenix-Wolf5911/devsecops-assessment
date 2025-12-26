@@ -1,0 +1,4 @@
+deployment.apps/nodeapp configured (dry run)
+networkpolicy.networking.k8s.io/nodeapp-network-policy created (dry run)
+poddisruptionbudget.policy/nodeapp-pdb created (dry run)
+service/nodeapp-service configured (dry run)

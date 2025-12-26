@@ -1,23 +1,29 @@
+# Example Terraform configuration for EKS simulation
 terraform {
+  required_version = ">= 1.0"
   required_providers {
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.3"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
   }
 }
 
-provider "local" {}
+# Provider configuration (commented for simulation)
+# provider "aws" {
+#   region = var.aws_region
+# }
 
-# Simulate creating a file (practice resource creation)
-resource "local_file" "example_file" {
-  content  = "Hello Terraform! This is a local simulation."
-  filename = "${path.module}/hello.txt"
+# VPC simulation
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "devsecops-vpc"
+  }
 }
 
-# Simulate another resource
-resource "null_resource" "example_null" {
-  provisioner "local-exec" {
-    command = "echo 'This is a null resource running locally!'"
-  }
+# Output for documentation
+output "vpc_id" {
+  description = "ID of the VPC"
+  value       = aws_vpc.main.id
 }
