@@ -19,11 +19,17 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      # 🔹 Build Docker image from root (optional)
+      - name: Build Docker image (root path)
+        run: docker build -t nodeapp-secure -f Dockerfile . || echo "No root Dockerfile found, skipping"
+
+      # 🔹 Build Docker image from docker/ folder (main build)
+      - name: Build Docker image (docker folder)
         run: |
           export DOCKER_BUILDKIT=1
           docker build -t nodeapp-secure -f docker/Dockerfile .
 
+      # 🔹 Run Trivy scan
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@v2
         with:
@@ -31,3 +37,4 @@ jobs:
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
+
